@@ -58,7 +58,13 @@ const update = async () => {
           label="新密码"
           label-width="50px"
           placeholder="请输入您要修改的密码"
-          :rules="[{ required: true, message: '请输入您要修改的密码' }]"
+          :rules="[
+            { required: true, message: '请填写密码' },
+            {
+              pattern: /^\S*(?=\S{8,12})(?=\S*\d)(?=\S*[a-zA-Z])\S*$/,
+              message: '密码长度需在8~12位之间，且必须包含字母和数字'
+            }
+          ]"
         />
         <van-field
           v-model="captcha"

@@ -2,11 +2,12 @@
 import { computed, ref } from 'vue'
 import { registerAndLogin, sendCaptcha } from '@/api/login.js'
 import { useUserStore } from '@/stores/index.js'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { showFailToast } from 'vant'
 
 const userStore = useUserStore()
 const router = useRouter()
+const route = useRoute()
 const isPasswordLogin = ref(true)
 
 const formModel = ref({
@@ -54,7 +55,8 @@ const onSubmit = async (values) => {
   const { data } = await registerAndLogin(values, loginType.value)
   userStore.setTokenInfo(data)
   userStore.setUsername(values.username)
-  await router.push('/')
+  const url = route.query.backUrl || '/'
+  await router.replace(url)
 }
 </script>
 
