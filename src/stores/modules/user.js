@@ -8,11 +8,15 @@ export const useUserStore = defineStore(
       tokenName: '',
       tokenValue: ''
     })
+    const username = ref('')
     const setTokenInfo = (token) => {
       tokenInfo.value = token
     }
+    const setUsername = (account) => {
+      username.value = account
+    }
 
-    return { tokenInfo, setTokenInfo }
+    return { tokenInfo, setTokenInfo, username, setUsername }
   },
   {
     persist: true

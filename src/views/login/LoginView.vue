@@ -1,9 +1,12 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { registerAndLogin, sendCaptcha } from '@/api/login.js'
 import { useUserStore } from '@/stores/index.js'
+import { useRouter } from 'vue-router'
+import { showFailToast } from 'vant'
 
 const userStore = useUserStore()
+const router = useRouter()
 const isPasswordLogin = ref(true)
 
 const formModel = ref({
@@ -14,13 +17,35 @@ const formModel = ref({
 const patternRules = {
   usernameRule:
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-  passwordRule: /^\S*(?=\S{6,12})(?=\S*\d)(?=\S*[a-zA-Z])\S*$/,
+  passwordRule: /^\S*(?=\S{8,12})(?=\S*\d)(?=\S*[a-zA-Z])\S*$/,
   captchaRule: /^\d{6}$/
 }
+const isLoading = ref(false)
+const isDisabled = ref(false)
+const countdown = ref(60)
+let timerId = null
 const sendEmailCaptcha = async (emailAccount) => {
+  if (formModel.value.username === '' || formModel.value.username === null) {
+    showFailToast({ message: '请输入邮箱', position: 'bottom' })
+    return
+  }
+  isLoading.value = true
   const res = await sendCaptcha(emailAccount)
+  isLoading.value = false
+  isDisabled.value = true
+  countdown.value = 60
+  timerId = setInterval(() => {
+    countdown.value -= 1
+    if (countdown.value <= 0) {
+      clearInterval(timerId)
+      isDisabled.value = false // 重置按钮可用状态
+    }
+  }, 1000)
   console.log(res)
 }
+const buttonLabel = computed(() => {
+  return isDisabled.value ? `${countdown.value}秒后重新发送` : '发送验证码'
+})
 const loginType = ref(1)
 const onSubmit = async (values) => {
   if (!isPasswordLogin.value) {
@@ -28,13 +53,14 @@ const onSubmit = async (values) => {
   }
   const { data } = await registerAndLogin(values, loginType.value)
   userStore.setTokenInfo(data)
-  console.log(data)
+  userStore.setUsername(values.username)
+  await router.push('/')
 }
 </script>
 
 <template>
   <div class="login">
-    <van-nav-bar title="飞驰自行车" left-arrow @click-left="$router.go(-1)" />
+    <van-nav-bar title="飞驰自行车" left-arrow @click-left="router.go(-1)" />
 
     <div class="container">
       <div class="title">
@@ -48,6 +74,7 @@ const onSubmit = async (values) => {
             v-model="formModel.username"
             name="username"
             label="账号"
+            label-width="50px"
             placeholder="电子邮箱"
             :rules="[
               { required: true, message: '请填写您的邮箱' },
@@ -60,6 +87,7 @@ const onSubmit = async (values) => {
             type="password"
             name="password"
             label="密码"
+            label-width="50px"
             placeholder="密码"
             :rules="[
               { required: true, message: '请填写密码' },
@@ -72,9 +100,9 @@ const onSubmit = async (values) => {
           <van-field
             v-else
             v-model="formModel.captcha"
-            type="password"
             name="captcha"
             label="验证码"
+            label-width="50px"
             placeholder="邮箱验证码"
             :rules="[
               { required: true, message: '请填写邮箱验证码' },
@@ -82,8 +110,14 @@ const onSubmit = async (values) => {
             ]"
           >
             <template #button>
-              <van-button size="small" type="primary" @click="sendEmailCaptcha(formModel.username)">
-                发送验证码
+              <van-button
+                :loading="isLoading"
+                :disabled="isDisabled"
+                size="small"
+                type="primary"
+                @click="sendEmailCaptcha(formModel.username)"
+              >
+                {{ buttonLabel }}
               </van-button>
             </template>
           </van-field>

@@ -6,14 +6,45 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      redirect: '/login'
+      component: () => import('@/views/index.vue'),
+      redirect: '/home',
+      children: [
+        {
+          // 主页
+          path: '/home',
+          name: 'HomeView',
+          component: () => import('@/views/home/HomeView.vue')
+        },
+        {
+          // 分类页面
+          path: '/category',
+          name: 'CategoryView',
+          component: () => import('@/views/category/CategoryView.vue')
+        },
+        {
+          // 用户页面
+          path: '/user',
+          name: 'UserView',
+          component: () => import('@/views/user/UserView.vue')
+        }
+      ]
     },
     {
+      // 个人资料
+      path: '/personal',
+      name: 'PersonalProfileView',
+      component: () => import('@/views/user/PersonalProfileView.vue')
+    },
+    {
+      // 修改密码
+      path: '/modifyPassword',
+      name: 'ModifyPasswordView',
+      component: () => import('@/views/user/ModifyPasswordView.vue')
+    },
+    {
+      // 登录页
       path: '/login',
       name: 'LoginView',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
       component: () => import('@/views/login/LoginView.vue')
     }
   ]

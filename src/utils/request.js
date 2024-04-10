@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useUserStore } from '@/stores/index.js'
+import { showFailToast } from 'vant'
 
 const instance = axios.create({
   baseURL: 'http://localhost:8002/',
@@ -28,6 +29,10 @@ instance.interceptors.response.use(
   function (response) {
     // 2xx 范围内的状态码都会触发该函数。
     // 对响应数据做点什么
+    if (response.data.code !== '200') {
+      showFailToast(response.data.msg)
+      return Promise.reject(response.data.msg)
+    }
     return response.data
   },
   function (error) {
