@@ -1,8 +1,10 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import dayjs from 'dayjs'
+import { useSelectedStore } from '@/stores/index.js'
 
 const format = 'YYYY-MM-DD'
+const selectedStore = useSelectedStore()
 const leaseDate = ref({
   startTime: dayjs().format(format),
   endTime: dayjs().add(1, 'day').format(format)
@@ -16,6 +18,8 @@ watch(leaseDate.value, (newLeaseDate) => {
   const end = dayjs(newLeaseDate.endTime)
   const minutes = end.diff(start, 'minute')
   countDay.value = Math.ceil(minutes / 60 / 24)
+  selectedStore.setReservationDatetime(leaseDate.value)
+  selectedStore.setCountDay(countDay.value)
 })
 
 const showTimePicker = ref(false)
@@ -68,6 +72,8 @@ const getEfficientTimeList = () => {
       columns.value[0].push({ text: timeList[i], value: timeList[i] })
     }
   }
+  leaseDate.value.startTime += ' ' + columns.value[0][0].value
+  leaseDate.value.endTime += ' ' + columns.value[0][0].value
 }
 getEfficientTimeList()
 
@@ -88,11 +94,6 @@ const chooseRange = () => {
 }
 
 const calendar = ref()
-
-// const changeTimeList = (time) => {
-//   // 如果选择的日期为当天，更新取车时间列表
-//   console.log(time)
-// }
 
 const confirm = () => {
   const selectedDate = calendar.value.getSelectedDate()

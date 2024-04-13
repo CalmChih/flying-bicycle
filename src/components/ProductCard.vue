@@ -2,25 +2,24 @@
 <template>
   <div class="product-card">
     <div>
-      <img :src="product.image" alt="商品图片" class="product-image" />
+      <img :src="product.goodsImg" alt="商品图片" class="product-image" />
     </div>
     <div class="product-info">
       <h3 class="product-title">
-        {{ product.title.length > 9 ? product.title.slice(0, 9) : product.title }}
+        {{ product.goodsTitle.length > 9 ? product.goodsTitle.slice(0, 9) : product.goodsTitle }}
       </h3>
-      <p class="product-price">￥{{ product.price }}</p>
+      <p class="product-price">￥{{ product.goodsPrice + '/天' }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
   product: {
     type: Object,
     required: true
   }
 })
-console.log(props)
 </script>
 
 <style scoped>
@@ -52,23 +51,22 @@ console.log(props)
 }
 
 .product-info {
+  width: 120px;
   text-align: left;
-}
-
-.product-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 4px;
-  color: #333;
-  line-height: 1.5;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.product-price {
-  font-size: 14px;
-  color: #ff6700;
-  font-weight: bold;
+  .product-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #333;
+    line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .product-price {
+    font-size: 14px;
+    color: #ff6700;
+    font-weight: bold;
+  }
 }
 </style>

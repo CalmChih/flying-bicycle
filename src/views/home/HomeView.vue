@@ -6,39 +6,39 @@ import ProductCard from '@/components/ProductCard.vue'
 const products = [
   {
     id: '123451',
-    title: '时尚潮流男女运动鞋',
-    price: '199.00元',
-    image: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
+    goodsTitle: '时尚潮流男女运动鞋',
+    goodsPrice: '199.00元',
+    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
   },
   {
     id: '123452',
-    title: '时尚潮流男女运动鞋',
-    price: '199.00元',
-    image: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
+    goodsTitle: '时尚潮流男女运动鞋',
+    goodsPrice: '199.00元',
+    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
   },
   {
     id: '123453',
-    title: '时尚潮流男女运动鞋asdfasdfasdfd',
-    price: '199.00元',
-    image: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
+    goodsTitle: '时尚潮流男女运动鞋asdfasdfasdfd',
+    goodsPrice: '199.00元',
+    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
   },
   {
     id: '123454',
-    title: '时尚潮流男女运动鞋',
-    price: '199.00元',
-    image: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
+    goodsTitle: '时尚潮流男女运动鞋',
+    goodsPrice: '199.00元',
+    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
   },
   {
     id: '123455',
-    title: '时尚潮流男女运动鞋',
-    price: '199.00元',
-    image: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
+    goodsTitle: '时尚潮流男女运动鞋',
+    goodsPrice: '199.00元',
+    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
   },
   {
     id: '123456',
-    title: '时尚潮流男女运动鞋',
-    price: '199.00元',
-    image: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
+    goodsTitle: '时尚潮流男女运动鞋',
+    goodsPrice: '199.00元',
+    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
   }
 ]
 

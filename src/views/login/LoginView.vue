@@ -62,7 +62,7 @@ const onSubmit = async (values) => {
 
 <template>
   <div class="login">
-    <van-nav-bar title="飞驰自行车" left-arrow @click-left="router.go(-1)" />
+    <van-nav-bar title="飞驰自行车" />
 
     <div class="container">
       <div class="title">

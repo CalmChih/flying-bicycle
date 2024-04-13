@@ -29,3 +29,7 @@ export const updatePassword = (searchParams) => {
     captcha: searchParams.captcha
   })
 }
+
+export const logout = () => {
+  return request.post('/logout')
+}

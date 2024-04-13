@@ -18,8 +18,13 @@ export const useUserStore = defineStore(
     const isLogin = computed(() => {
       return tokenInfo.value.tokenValue !== ''
     })
+    const logout = () => {
+      localStorage.removeItem('userInfo')
+      tokenInfo.value = {}
+      username.value = ''
+    }
 
-    return { tokenInfo, setTokenInfo, username, setUsername, isLogin }
+    return { tokenInfo, setTokenInfo, username, setUsername, isLogin, logout }
   },
   {
     persist: true

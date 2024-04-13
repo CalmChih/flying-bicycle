@@ -21,7 +21,14 @@ const router = createRouter({
           // 分类页面
           path: '/category',
           name: 'CategoryView',
-          component: () => import('@/views/category/CategoryView.vue')
+          component: () => import('@/views/category/CategoryView.vue'),
+          children: [
+            {
+              path: '/category/:categoryId',
+              name: 'CategoryGoodsView',
+              component: () => import('@/views/category/CategoryGoodsView.vue')
+            }
+          ]
         },
         {
           // 用户页面
@@ -48,6 +55,12 @@ const router = createRouter({
       path: '/login',
       name: 'LoginView',
       component: () => import('@/views/login/LoginView.vue')
+    },
+    {
+      // 商品详情
+      path: '/goodsDetail/:goodsId',
+      name: 'GoodsDetailView',
+      component: () => import('@/views/goods/GoodsDetailView.vue')
     }
   ]
 })
