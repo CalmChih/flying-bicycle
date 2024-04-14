@@ -6,7 +6,7 @@
     </div>
     <div class="product-info">
       <h3 class="product-title">
-        {{ product.goodsTitle.length > 9 ? product.goodsTitle.slice(0, 9) : product.goodsTitle }}
+        {{ product.goodsTitle }}
       </h3>
       <p class="product-price">￥{{ product.goodsPrice + '/天' }}</p>
     </div>

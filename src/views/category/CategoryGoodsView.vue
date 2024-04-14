@@ -2,31 +2,28 @@
 import ProductCard from '@/components/ProductCard.vue'
 import { useRoute } from 'vue-router'
 import { ref, watch } from 'vue'
-import { getGoodsList } from '@/api/goods.js'
+import { getValidGoodsList } from '@/api/goods.js'
 import router from '@/router/index.js'
+import { useSelectedStore } from '@/stores/index.js'
 
 const route = useRoute()
+const selectedStore = useSelectedStore()
 
 const products = ref([])
 const loading = ref(false)
 const finished = ref(false)
 const goodsTotal = ref(0)
 const searchParam = ref({
-  currentPage: 0,
-  pageSize: 10,
-  categoryId: 0
+  categoryId: 0,
+  reservationStartTime: selectedStore.reservationDatetime.reservationStartTime,
+  reservationEndTime: selectedStore.reservationDatetime.reservationEndTime
 })
 const onLoad = async () => {
-  searchParam.value.currentPage = searchParam.value.currentPage + 1
   searchParam.value.categoryId = Number(route.params.categoryId)
-  const {
-    data: { list, total }
-  } = await getGoodsList(searchParam.value)
-  for (const item of list) {
-    products.value.push(item)
-  }
-  goodsTotal.value = total
-  if (total === 0) {
+  const { data } = await getValidGoodsList(searchParam.value)
+  products.value = data
+  goodsTotal.value = products.value.length
+  if (goodsTotal.value === 0) {
     finished.value = true
   }
   // 加载状态结束

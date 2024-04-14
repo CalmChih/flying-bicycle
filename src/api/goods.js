@@ -13,3 +13,9 @@ export const getGoodsById = (goodsId) => {
     }
   })
 }
+
+export const getValidGoodsList = (searchParam) => {
+  return request.post('/goods/getValidGoodsList', {
+    ...searchParam
+  })
+}
