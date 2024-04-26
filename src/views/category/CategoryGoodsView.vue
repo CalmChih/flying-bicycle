@@ -1,12 +1,12 @@
 <script setup>
 import ProductCard from '@/components/ProductCard.vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ref, watch } from 'vue'
 import { getValidGoodsList } from '@/api/goods.js'
-import router from '@/router/index.js'
 import { useSelectedStore } from '@/stores/index.js'
 
 const route = useRoute()
+const router = useRouter()
 const selectedStore = useSelectedStore()
 
 const products = ref([])
@@ -51,7 +51,7 @@ const openGoodsDetail = (goodsId) => {
     style="overflow: auto; width: 100%; height: 94vh"
   >
     <van-grid :column-num="1" :border="false" style="margin-left: 20px">
-      <van-grid-item v-for="item in products" :key="item.id" style="width: 100px">
+      <van-grid-item v-for="item in products" :key="item.goodsId" style="width: 100px">
         <product-card :product="item" @click="openGoodsDetail(item.goodsId)" />
       </van-grid-item>
     </van-grid>

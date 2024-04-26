@@ -2,11 +2,14 @@
 import { useRoute, useRouter } from 'vue-router'
 import { getGoodsById } from '@/api/goods.js'
 import { ref } from 'vue'
-import { useSelectedStore } from '@/stores/index.js'
+import { useSelectedStore, useUserStore } from '@/stores/index.js'
+import { addOrder } from '@/api/order.js'
+import { showSuccessToast } from 'vant'
 
 const route = useRoute()
 const router = useRouter()
 const selectedStore = useSelectedStore()
+const userStore = useUserStore()
 const goodsId = route.params.goodsId
 const goodsItem = ref({})
 const countPrice = ref()
@@ -22,6 +25,20 @@ const getGoodsItem = async () => {
   countPrice.value = goodsItem.value.goodsPrice * countDay * 100
 }
 getGoodsItem()
+
+const onSubmit = async () => {
+  const orderItem = {
+    username: userStore.username,
+    goodsId: goodsId,
+    reservationStartTime: reservationDatetime.reservationStartTime,
+    reservationEndTime: reservationDatetime.reservationEndTime,
+    reservationDays: countDay,
+    totalPrice: goodsItem.value.goodsPrice * countDay
+  }
+  const { data } = await addOrder(orderItem)
+  showSuccessToast('下单成功，请尽快付款')
+  await router.push(`/orderDetail/${data}`)
+}
 </script>
 
 <template>

@@ -19,3 +19,11 @@ export const getValidGoodsList = (searchParam) => {
     ...searchParam
   })
 }
+
+export const getGoodsByTag = (tag) => {
+  return request.get('/goods/getGoodsByTag', {
+    params: {
+      tag: tag
+    }
+  })
+}

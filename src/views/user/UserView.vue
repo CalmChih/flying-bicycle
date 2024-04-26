@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import { showConfirmDialog, showSuccessToast } from 'vant'
 import { useUserStore } from '@/stores/index.js'
 import { useRouter } from 'vue-router'
+import { getOrderCountGroupByState } from '@/api/order.js'
 
 const avatar = ref('src/assets/images/mao.jpeg')
 const nickname = ref('')
@@ -34,6 +35,29 @@ const signOut = () => {
       // on cancel
     })
 }
+
+const orderBadge = ref({
+  pendingPayment: '',
+  waitingToBePickedUp: '',
+  waitingToBeReturned: '',
+  aftermarket: ''
+})
+const getOrderStateCount = async () => {
+  const { data } = await getOrderCountGroupByState()
+  data.forEach((item) => {
+    if (item.count === 0) {
+      return
+    }
+    if (item.orderState === 0) {
+      orderBadge.value.pendingPayment = item.count
+    } else if (item.orderState === 1) {
+      orderBadge.value.waitingToBePickedUp = item.count
+    } else if (item.orderState === 2) {
+      orderBadge.value.waitingToBeReturned = item.count
+    }
+  })
+}
+getOrderStateCount()
 </script>
 
 <template>
@@ -60,11 +84,31 @@ const signOut = () => {
     <van-row style="margin-top: 20px">
       <van-col :span="24">
         <van-grid clickable :column-num="5">
-          <van-grid-item icon="home-o" badge="1" text="全部" to="/"></van-grid-item>
-          <van-grid-item icon="home-o" text="待付款" to="/"></van-grid-item>
-          <van-grid-item icon="home-o" text="待取车" to="/"></van-grid-item>
-          <van-grid-item icon="home-o" text="待还车" to="/"></van-grid-item>
-          <van-grid-item icon="home-o" text="退款/售后" to="/"></van-grid-item>
+          <van-grid-item icon="home-o" text="全部" to="/orderList/all"></van-grid-item>
+          <van-grid-item
+            icon="home-o"
+            :badge="orderBadge.pendingPayment"
+            text="待付款"
+            to="/orderList/pendingPayment"
+          ></van-grid-item>
+          <van-grid-item
+            icon="home-o"
+            :badge="orderBadge.waitingToBePickedUp"
+            text="待取车"
+            to="/orderList/waitingToBePickedUp"
+          ></van-grid-item>
+          <van-grid-item
+            icon="home-o"
+            :badge="orderBadge.waitingToBeReturned"
+            text="待还车"
+            to="/orderList/waitingToBeReturned"
+          ></van-grid-item>
+          <van-grid-item
+            icon="home-o"
+            :badge="orderBadge.aftermarket"
+            text="退款/售后"
+            to="/orderList/aftermarket"
+          ></van-grid-item>
         </van-grid>
       </van-col>
     </van-row>

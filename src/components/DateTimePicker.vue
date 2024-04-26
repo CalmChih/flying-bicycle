@@ -1,25 +1,23 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, defineEmits } from 'vue'
 import dayjs from 'dayjs'
 import { useSelectedStore } from '@/stores/index.js'
 
 const format = 'YYYY-MM-DD'
 const selectedStore = useSelectedStore()
 const leaseDate = ref({
-  startTime: dayjs().format(format),
-  endTime: dayjs().add(1, 'day').format(format)
+  reservationStartTime: '',
+  reservationEndTime: '',
+  countDay: 1
 })
 const defaultDate = [new dayjs().toDate(), dayjs().add(1, 'day').toDate()]
-const start = dayjs(leaseDate.value.startTime)
-const end = dayjs(leaseDate.value.endTime)
-const countDay = ref(end.diff(start, 'day'))
 watch(leaseDate.value, (newLeaseDate) => {
-  const start = dayjs(newLeaseDate.startTime)
-  const end = dayjs(newLeaseDate.endTime)
+  const start = dayjs(newLeaseDate.reservationStartTime)
+  const end = dayjs(newLeaseDate.reservationEndTime)
   const minutes = end.diff(start, 'minute')
-  countDay.value = Math.ceil(minutes / 60 / 24)
+  leaseDate.value.countDay = Math.ceil(minutes / 60 / 24)
   selectedStore.setReservationDatetime(leaseDate.value)
-  selectedStore.setCountDay(countDay.value)
+  selectedStore.setCountDay(leaseDate.value.countDay)
 })
 
 const showTimePicker = ref(false)
@@ -65,15 +63,20 @@ const getEfficientTimeList = () => {
     for (let i = 0; i < newTimeList.length; i++) {
       columns.value[0].push({ text: newTimeList[i], value: newTimeList[i] })
     }
+    leaseDate.value.reservationStartTime = dayjs().format(format) + ' ' + columns.value[0][0].value
+    leaseDate.value.reservationEndTime =
+      dayjs().add(1, 'day').format(format) + ' ' + columns.value[0][0].value
   } else {
     defaultDate[0] = dayjs().add(1, 'day').toDate()
     defaultDate[1] = dayjs().add(2, 'day').toDate()
     for (let i = 0; i < timeList.length; i++) {
       columns.value[0].push({ text: timeList[i], value: timeList[i] })
     }
+    leaseDate.value.reservationStartTime =
+      dayjs().add(1, 'day').format(format) + ' ' + columns.value[0][0].value
+    leaseDate.value.reservationEndTime =
+      dayjs().add(2, 'day').format(format) + ' ' + columns.value[0][0].value
   }
-  leaseDate.value.startTime += ' ' + columns.value[0][0].value
-  leaseDate.value.endTime += ' ' + columns.value[0][0].value
 }
 getEfficientTimeList()
 
@@ -95,12 +98,14 @@ const chooseRange = () => {
 
 const calendar = ref()
 
+const emit = defineEmits(['updateGoodsList'])
 const confirm = () => {
   const selectedDate = calendar.value.getSelectedDate()
   const startDate = selectedDate[0]
   const endDate = selectedDate[1]
-  leaseDate.value.startTime = dayjs(startDate).format(format) + ' ' + chooseTime.value[0]
-  leaseDate.value.endTime = dayjs(endDate).format(format) + ' ' + chooseTime.value[1]
+  leaseDate.value.reservationStartTime = dayjs(startDate).format(format) + ' ' + chooseTime.value[0]
+  leaseDate.value.reservationEndTime = dayjs(endDate).format(format) + ' ' + chooseTime.value[1]
+  emit('updateGoodsList')
   showTimePicker.value = false
 }
 const cancel = () => {
@@ -114,13 +119,13 @@ const cancel = () => {
       <van-col><h2>租赁时间</h2></van-col>
       <van-col span="24" @click="chooseRange">
         <van-grid :column-num="3">
-          <van-grid-item :text="leaseDate.startTime" />
-          <van-grid-item :text="`共${countDay}天`" />
-          <van-grid-item :text="leaseDate.endTime" />
+          <van-grid-item :text="leaseDate.reservationStartTime" />
+          <van-grid-item :text="`共${leaseDate.countDay}天`" />
+          <van-grid-item :text="leaseDate.reservationEndTime" />
         </van-grid>
       </van-col>
       <van-col span="24">
-        <van-button type="primary" block>去选车</van-button>
+        <van-button type="primary" block @click="showTimePicker = true">选择租赁时间</van-button>
       </van-col>
     </van-row>
     <van-popup v-model:show="showTimePicker" position="bottom" round class="date-time-container">

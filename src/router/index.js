@@ -61,6 +61,24 @@ const router = createRouter({
       path: '/goodsDetail/:goodsId',
       name: 'GoodsDetailView',
       component: () => import('@/views/goods/GoodsDetailView.vue')
+    },
+    {
+      // 订单列表
+      path: '/orderList/:orderType',
+      name: 'OrderListView',
+      component: () => import('@/views/order/OrderListView.vue')
+    },
+    {
+      // 订单详情
+      path: '/orderDetail/:orderId',
+      name: 'OrderDetailView',
+      component: () => import('@/views/order/OrderDetailView.vue')
+    },
+    {
+      // test
+      path: '/test',
+      name: 'TestView',
+      component: () => import('@/views/testView.vue')
     }
   ]
 })

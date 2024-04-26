@@ -12,8 +12,8 @@ export const useSelectedStore = defineStore(
     })
     const countDay = ref(1)
     const setReservationDatetime = (datetime) => {
-      reservationDatetime.value.reservationStartTime = datetime.startTime
-      reservationDatetime.value.reservationEndTime = datetime.endTime
+      reservationDatetime.value.reservationStartTime = datetime.reservationStartTime
+      reservationDatetime.value.reservationEndTime = datetime.reservationStartTime
     }
     const setCountDay = (count) => {
       countDay.value = count

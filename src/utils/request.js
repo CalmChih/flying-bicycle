@@ -31,8 +31,8 @@ instance.interceptors.response.use(
     // 对响应数据做点什么
     if (response.data.code === '401') {
       showFailToast('请登录后访问')
-      router.push('/login')
-      return Promise.reject('请登录后访问')
+      router.push('/login').then(() => Promise.reject('请登录后访问'))
+      return
     }
     if (response.data.code !== '200') {
       showFailToast(response.data.msg)

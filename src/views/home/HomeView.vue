@@ -1,106 +1,73 @@
-<script setup="">
+<script setup>
 import { ref } from 'vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ProductCard from '@/components/ProductCard.vue'
+import { getGoodsByTag, getValidGoodsList } from '@/api/goods.js'
+import { useSelectedStore } from '@/stores/index.js'
+import { useRouter } from 'vue-router'
+import { closeToast, showLoadingToast } from 'vant'
 
-const products = [
-  {
-    id: '123451',
-    goodsTitle: '时尚潮流男女运动鞋',
-    goodsPrice: '199.00元',
-    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
-  },
-  {
-    id: '123452',
-    goodsTitle: '时尚潮流男女运动鞋',
-    goodsPrice: '199.00元',
-    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
-  },
-  {
-    id: '123453',
-    goodsTitle: '时尚潮流男女运动鞋asdfasdfasdfd',
-    goodsPrice: '199.00元',
-    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
-  },
-  {
-    id: '123454',
-    goodsTitle: '时尚潮流男女运动鞋',
-    goodsPrice: '199.00元',
-    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
-  },
-  {
-    id: '123455',
-    goodsTitle: '时尚潮流男女运动鞋',
-    goodsPrice: '199.00元',
-    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
-  },
-  {
-    id: '123456',
-    goodsTitle: '时尚潮流男女运动鞋',
-    goodsPrice: '199.00元',
-    goodsImg: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg'
-  }
-]
+document.body.style.overflow = 'hidden'
+const selectedStore = useSelectedStore()
+const router = useRouter()
+const products = ref([])
+const searchParam = ref({
+  reservationStartTime: selectedStore.reservationDatetime.reservationStartTime,
+  reservationEndTime: selectedStore.reservationDatetime.reservationEndTime
+})
+const tag = ref('')
 
-const list = ref([])
-const loading = ref(false)
-const finished = ref(false)
+const getGoodsList = async () => {
+  showLoadingToast({
+    duration: 0,
+    forbidClick: true,
+    message: '加载中......'
+  })
+  const { data } = await getValidGoodsList(searchParam.value)
+  products.value = data
+  closeToast()
+}
+getGoodsList()
 
-const onLoad = () => {
-  // 异步更新数据
-  // setTimeout 仅做示例，真实场景中一般为 ajax 请求
-  setTimeout(() => {
-    for (let i = 0; i < 10; i++) {
-      list.value.push({
-        thumb: list.value.length + 1,
-        title: list.value.length + 1,
-        price: list.value.length + 1
-      })
-    }
-
-    // 加载状态结束
-    loading.value = false
-
-    // 数据全部加载完成
-    if (list.value.length >= 40) {
-      finished.value = true
-    }
-  }, 1000)
+const openGoodsDetail = (goodsId) => {
+  console.log(goodsId)
+  router.push(`/goodsDetail/${goodsId}`)
 }
 
-const onClickButton = () => {
-  console.log('点击')
+const onSearch = async () => {
+  if (tag.value === '') {
+    await getGoodsList()
+    return
+  }
+  const { data } = await getGoodsByTag(tag.value)
+  products.value = data
 }
 </script>
 
 <template>
   <div class="home-container">
-    <van-sticky>
-      <van-search v-model="value" shape="round" placeholder="请输入搜索关键词" @search="onSearch">
-        <template #right-icon>
-          <van-button round type="success" @click="onClickButton" size="mini">搜索</van-button>
-        </template>
-      </van-search>
-    </van-sticky>
-    <date-time-picker></date-time-picker>
-    <van-list
-      v-model:loading="loading"
-      :finished="finished"
-      @load="onLoad"
-      loading-text="加载更多..."
-    >
+    <div style="height: 9vh">
+      <van-sticky>
+        <van-search v-model="tag" shape="round" placeholder="请输入搜索关键词">
+          <template #right-icon>
+            <van-button round type="success" @click="onSearch" size="mini">搜索</van-button>
+          </template>
+        </van-search>
+      </van-sticky>
+    </div>
+    <div style="height: 85vh; overflow: auto">
+      <date-time-picker @updateGoodsList="getGoodsList"></date-time-picker>
       <van-grid :column-num="2" :border="false">
-        <van-grid-item v-for="item in products" :key="item.id" style="width: 140px">
-          <product-card :product="item" />
+        <van-grid-item v-for="item in products" :key="item.goodsId" style="width: 100px">
+          <product-card :product="item" @click="openGoodsDetail(item.goodsId)" />
         </van-grid-item>
       </van-grid>
-    </van-list>
+    </div>
   </div>
 </template>
 
 <style lang="less" scoped>
 .home-container {
-  margin-bottom: 50px;
 }
 .van-search {
   box-shadow: 0 2px 4px rgba(140, 64, 64, 0.09); /* 添加阴影效果（可选） */
