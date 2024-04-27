@@ -1,25 +1,35 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import dayjs from 'dayjs'
 
-const format = 'YYYY-MM-DD'
 export const useSelectedStore = defineStore(
   'selectedDateTime',
   () => {
     const reservationDatetime = ref({
-      reservationStartTime: dayjs().format(format),
-      reservationEndTime: dayjs().add(1, 'day').format(format)
+      reservationStartTime: '',
+      reservationEndTime: ''
     })
     const countDay = ref(1)
     const setReservationDatetime = (datetime) => {
       reservationDatetime.value.reservationStartTime = datetime.reservationStartTime
-      reservationDatetime.value.reservationEndTime = datetime.reservationStartTime
+      reservationDatetime.value.reservationEndTime = datetime.reservationEndTime
     }
     const setCountDay = (count) => {
       countDay.value = count
     }
+    const containsReservationDatetime = computed(() => {
+      return (
+        reservationDatetime.value.reservationStartTime !== '' &&
+        reservationDatetime.value.reservationEndTime !== ''
+      )
+    })
 
-    return { reservationDatetime, countDay, setReservationDatetime, setCountDay }
+    return {
+      reservationDatetime,
+      countDay,
+      setReservationDatetime,
+      setCountDay,
+      containsReservationDatetime
+    }
   },
   {
     persist: true

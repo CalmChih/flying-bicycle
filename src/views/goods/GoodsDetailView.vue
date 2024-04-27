@@ -21,7 +21,6 @@ const countDay = selectedStore.countDay
 const getGoodsItem = async () => {
   const { data } = await getGoodsById(goodsId)
   goodsItem.value = data
-  console.log(data)
   countPrice.value = goodsItem.value.goodsPrice * countDay * 100
 }
 getGoodsItem()

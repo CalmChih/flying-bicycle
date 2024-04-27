@@ -63,22 +63,34 @@ const getEfficientTimeList = () => {
     for (let i = 0; i < newTimeList.length; i++) {
       columns.value[0].push({ text: newTimeList[i], value: newTimeList[i] })
     }
-    leaseDate.value.reservationStartTime = dayjs().format(format) + ' ' + columns.value[0][0].value
-    leaseDate.value.reservationEndTime =
-      dayjs().add(1, 'day').format(format) + ' ' + columns.value[0][0].value
   } else {
     defaultDate[0] = dayjs().add(1, 'day').toDate()
     defaultDate[1] = dayjs().add(2, 'day').toDate()
     for (let i = 0; i < timeList.length; i++) {
       columns.value[0].push({ text: timeList[i], value: timeList[i] })
     }
+  }
+}
+getEfficientTimeList()
+
+const setDefaultDatetimeRange = () => {
+  if (currTimeStr.value < timeList[timeList.length - 1]) {
+    leaseDate.value.reservationStartTime = dayjs().format(format) + ' ' + columns.value[0][0].value
+    leaseDate.value.reservationEndTime =
+      dayjs().add(1, 'day').format(format) + ' ' + columns.value[0][0].value
+  } else {
     leaseDate.value.reservationStartTime =
       dayjs().add(1, 'day').format(format) + ' ' + columns.value[0][0].value
     leaseDate.value.reservationEndTime =
       dayjs().add(2, 'day').format(format) + ' ' + columns.value[0][0].value
   }
 }
-getEfficientTimeList()
+if (selectedStore.containsReservationDatetime) {
+  leaseDate.value.reservationStartTime = selectedStore.reservationDatetime.reservationStartTime
+  leaseDate.value.reservationEndTime = selectedStore.reservationDatetime.reservationEndTime
+} else {
+  setDefaultDatetimeRange()
+}
 
 const chooseTime = ref([])
 const maxDate = ref()

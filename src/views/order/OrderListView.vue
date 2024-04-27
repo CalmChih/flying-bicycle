@@ -1,15 +1,8 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { cancelOrder, getOrderList, pay, pickupBicycle } from '@/api/order.js'
+import { getOrderList, pay, pickupBicycle, returnBicycle } from '@/api/order.js'
 import { ref } from 'vue'
-import {
-  closeToast,
-  showConfirmDialog,
-  showFailToast,
-  showLoadingToast,
-  showSuccessToast
-} from 'vant'
-import dayjs from 'dayjs'
+import { closeToast, showLoadingToast, showSuccessToast } from 'vant'
 
 const route = useRoute()
 const router = useRouter()
@@ -33,55 +26,41 @@ const getData = async () => {
   orderStates.value = orderStateMapper[orderType] || ''
   const { data } = await getOrderList(orderStates.value)
   orderList.value = data
-  orderList.value.forEach((order) => {
-    order.goodsDesc = String(order.goodsDesc).substring(0, 50) + '...'
-  })
   closeToast()
 }
 getData()
 
-const goPay = async (orderId) => {
+const goPay = async (orderId, event) => {
+  event.stopPropagation()
   const { data } = await pay(orderId)
   const newWindow = window.open('', '_blank') // 打开新窗口
   newWindow.document.write(data) // 将HTML写入新窗口文档
 }
-const cancel = async (order) => {
-  if (dayjs().isAfter(order.reservationStartTime)) {
-    showFailToast('当前时间已超过预约的租赁时间，无法取消订单')
-    return
-  }
-  showConfirmDialog({
-    title: '取消订单',
-    message: '确认取消订单吗',
-    width: '320px',
-    confirmButtonColor: 'blue'
-  })
-    .then(async () => {
-      const orderItem = {
-        orderId: order.orderId,
-        reservationStartTime: order.reservationStartTime,
-        orderState: order.orderState
-      }
-      await cancelOrder(orderItem)
-      await getData()
-      showSuccessToast('取消订单成功')
-    })
-    .catch(() => {
-      // on cancel
-    })
-}
 
-const pickup = async (order) => {
+const pickup = async (order, event) => {
+  event.stopPropagation()
   const orderItem = {
     orderId: order.orderId,
     reservationStartTime: order.reservationStartTime,
     reservationEndTime: order.reservationEndTime
   }
   await pickupBicycle(orderItem)
+  showSuccessToast('取车成功')
 }
 
 const goOrderDetail = (orderId) => {
   router.push(`/orderDetail/${orderId}`)
+}
+
+const returnBike = async (order, event) => {
+  event.stopPropagation()
+  const orderItem = {
+    orderId: order.orderId,
+    reservationEndTime: order.reservationEndTime
+  }
+  await returnBicycle(orderItem)
+  showSuccessToast('还车成功')
+  router.go(0)
 }
 </script>
 
@@ -98,7 +77,6 @@ const goOrderDetail = (orderId) => {
       <van-card
         num="2"
         :price="Number(order.totalPrice).toFixed(2)"
-        :desc="order.goodsDesc"
         :title="order.goodsTitle"
         :thumb="order.goodsImg"
         style="background-color: #fbfbfb"
@@ -112,31 +90,36 @@ const goOrderDetail = (orderId) => {
             <div class="order-state">{{ order.orderState }}</div>
           </div>
         </template>
-        <template #desc>
-          {{ order.goodsDesc }}
+        <template #price>
+          <div v-if="order.orderState !== '售后中'">{{ Number(order.totalPrice).toFixed(2) }}</div>
+          <div v-else>退款金额：￥{{ Number(order.refundAmount).toFixed(2) }}</div>
         </template>
-        <template v-slot:num> 共{{ order.reservationDays }}天 </template>
+        <template #desc>
+          <van-text-ellipsis rows="2" :content="order.goodsDesc" />
+        </template>
+        <template v-slot:num>
+          <div v-if="order.orderState !== '售后中'">共{{ order.reservationDays }}天</div>
+        </template>
         <template #footer>
           <div>预约时间：{{ order.reservationStartTime + ' ~ ' + order.reservationEndTime }}</div>
           <div v-if="order.orderState === '待支付'">
-            <van-button size="small" style="color: red" @click="goPay(order.orderId)">
+            <van-button
+              size="small"
+              class="action-bar-button"
+              @click="goPay(order.orderId, $event)"
+            >
               去支付
             </van-button>
           </div>
           <div v-else-if="order.orderState === '待取车'">
-            <van-button size="small" @click="cancel(order)">取消订单</van-button>
-            <van-button
-              size="small"
-              style="color: #ff6700; border-color: #ff6700"
-              @click="pickup(order)"
-              >确认取车</van-button
+            <van-button size="small" class="action-bar-button" @click="pickup(order, $event)"
+              >取车</van-button
             >
           </div>
           <div v-else-if="order.orderState === '待还车'">
-            <van-button size="small">确认还车</van-button>
-          </div>
-          <div v-else-if="order.orderState === '交易成功'">
-            <van-button size="small">申请售后</van-button>
+            <van-button size="small" class="action-bar-button" @click="returnBike(order, $event)"
+              >还车</van-button
+            >
           </div>
         </template>
       </van-card>
@@ -163,23 +146,27 @@ const goOrderDetail = (orderId) => {
   position: relative; /* 确保子元素相对于此容器定位 */
   height: 100vh; /* 占据整个视口高度 */
   overflow: hidden; /* 隐藏超出容器的内容 */
+  .fixed-nav-bar {
+    position: fixed; /* 固定在顶部 */
+    top: 0; /* 顶部对齐 */
+    left: 0; /* 左侧对齐 */
+    right: 0; /* 右侧对齐 */
+    z-index: 10; /* 确保导航栏在内容之上 */
+    /* 可能需要设置宽度和背景色等 */
+  }
+  .scrollable-list {
+    position: absolute; /* 相对于父容器定位 */
+    top: 50px; /* 导航栏的高度 *; /* 从导航栏下方开始 */
+    bottom: 0; /* 底部对齐 */
+    left: 0; /* 左侧对齐 */
+    right: 0; /* 右侧对齐 */
+    overflow-y: auto; /* 垂直滚动 */
+  }
 }
 
-.fixed-nav-bar {
-  position: fixed; /* 固定在顶部 */
-  top: 0; /* 顶部对齐 */
-  left: 0; /* 左侧对齐 */
-  right: 0; /* 右侧对齐 */
-  z-index: 10; /* 确保导航栏在内容之上 */
-  /* 可能需要设置宽度和背景色等 */
-}
-
-.scrollable-list {
-  position: absolute; /* 相对于父容器定位 */
-  top: 50px; /* 导航栏的高度 *; /* 从导航栏下方开始 */
-  bottom: 0; /* 底部对齐 */
-  left: 0; /* 左侧对齐 */
-  right: 0; /* 右侧对齐 */
-  overflow-y: auto; /* 垂直滚动 */
+.action-bar-button {
+  color: #ff6700;
+  border-color: #ff6700;
+  width: 66px;
 }
 </style>

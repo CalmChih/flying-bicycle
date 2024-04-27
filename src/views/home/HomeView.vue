@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import DateTimePicker from '@/components/DateTimePicker.vue'
+import DateTimePicker from '@/views/home/DateTimePicker.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { getGoodsByTag, getValidGoodsList } from '@/api/goods.js'
 import { useSelectedStore } from '@/stores/index.js'

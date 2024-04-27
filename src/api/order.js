@@ -35,3 +35,11 @@ export const cancelOrder = (orderItem) => {
 export const pickupBicycle = (orderItem) => {
   return request.post('/order/pickupBicycle', { ...orderItem })
 }
+
+export const returnBicycle = (orderItem) => {
+  return request.post('/order/returnBicycle', { ...orderItem })
+}
+
+export const applyForAfterSales = (orderItem) => {
+  return request.post('/order/applyForAfterSales', { ...orderItem })
+}
