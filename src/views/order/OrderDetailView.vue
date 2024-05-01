@@ -11,6 +11,7 @@ import {
 import { ref } from 'vue'
 import dayjs from 'dayjs'
 import { showConfirmDialog, showFailToast, showNotify, showSuccessToast } from 'vant'
+import _ from 'lodash'
 
 const route = useRoute()
 const router = useRouter()
@@ -96,12 +97,10 @@ const maxRefundAmount = (refundAmount) => {
 }
 
 const afterSalesSubmit = async () => {
-  const orderItem = {
-    orderId: orderInfo.value.orderId,
-    refundAmount: formData.value.refundAmount,
-    refundReason: formData.value.refundReason
-  }
-  await applyForAfterSales(orderItem)
+  const afterSalesInfo = _.cloneDeep(orderInfo.value)
+  afterSalesInfo.requestRefundAmount = formData.value.requestRefundAmount
+  afterSalesInfo.refundReason = formData.value.refundReason
+  await applyForAfterSales(afterSalesInfo)
   showNotify({ type: 'success', message: '申请售后成功', background: '#57ad24' })
   await router.push('/orderList/aftermarket')
 }
@@ -160,7 +159,12 @@ const afterSalesSubmit = async () => {
       <div v-else class="bottom-action-bar">
         <div class="button-container">
           <div v-if="orderInfo.orderState === '待取车'">
-            <van-button round @click="showAfterSalesForm = true">申请售后</van-button>
+            <van-button
+              round
+              @click="showAfterSalesForm = true"
+              v-if="dayjs().isAfter(orderInfo.reservationStartTime)"
+              >申请售后</van-button
+            >
             <van-button
               round
               @click="cancel"
@@ -175,6 +179,7 @@ const afterSalesSubmit = async () => {
             >
           </div>
           <div v-else-if="orderInfo.orderState === '待还车'">
+            <van-button round @click="showAfterSalesForm = true">申请售后</van-button>
             <van-button
               round
               style="color: #ff6700; border-color: #ff6700; width: 75px"
@@ -197,9 +202,9 @@ const afterSalesSubmit = async () => {
             <van-form style="margin-top: 60px" @submit="afterSalesSubmit">
               <van-cell-group inset>
                 <van-field
-                  v-model="formData.refundAmount"
+                  v-model="formData.requestRefundAmount"
                   type="number"
-                  name="refundAmount"
+                  name="requestRefundAmount"
                   label="退款金额"
                   placeholder="退款金额"
                   :rules="[

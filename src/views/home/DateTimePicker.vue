@@ -85,7 +85,7 @@ const setDefaultDatetimeRange = () => {
       dayjs().add(2, 'day').format(format) + ' ' + columns.value[0][0].value
   }
 }
-if (selectedStore.containsReservationDatetime) {
+if (selectedStore.containsEffectiveReservationDatetime) {
   leaseDate.value.reservationStartTime = selectedStore.reservationDatetime.reservationStartTime
   leaseDate.value.reservationEndTime = selectedStore.reservationDatetime.reservationEndTime
 } else {

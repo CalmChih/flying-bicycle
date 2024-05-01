@@ -1,4 +1,7 @@
 import request from '@/utils/request.js'
+import { useUserStore } from '@/stores/index.js'
+
+const userStore = useUserStore()
 
 export const addOrder = (orderItem) => {
   return request.post('/order/addOrder', { ...orderItem })
@@ -25,7 +28,16 @@ export const getOrderCountGroupByState = () => {
 }
 
 export const getOrderList = (orderStates) => {
-  return request.post('/order/getOrderList', { orderStates })
+  return request.post('/order/getOrderList', {
+    username: userStore.username,
+    orderStates
+  })
+}
+
+export const getAfterSalesList = () => {
+  return request.post('/afterSales/getAfterSalesList', {
+    username: userStore.username
+  })
 }
 
 export const cancelOrder = (orderItem) => {
@@ -41,5 +53,5 @@ export const returnBicycle = (orderItem) => {
 }
 
 export const applyForAfterSales = (orderItem) => {
-  return request.post('/order/applyForAfterSales', { ...orderItem })
+  return request.post('/afterSales/applyForAfterSales', { ...orderItem })
 }

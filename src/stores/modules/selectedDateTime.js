@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
+import dayjs from 'dayjs'
 
 export const useSelectedStore = defineStore(
   'selectedDateTime',
@@ -16,11 +17,14 @@ export const useSelectedStore = defineStore(
     const setCountDay = (count) => {
       countDay.value = count
     }
-    const containsReservationDatetime = computed(() => {
-      return (
+    const containsEffectiveReservationDatetime = computed(() => {
+      if (
         reservationDatetime.value.reservationStartTime !== '' &&
         reservationDatetime.value.reservationEndTime !== ''
-      )
+      ) {
+        return dayjs().isBefore(reservationDatetime.value.reservationStartTime)
+      }
+      return false
     })
 
     return {
@@ -28,7 +32,7 @@ export const useSelectedStore = defineStore(
       countDay,
       setReservationDatetime,
       setCountDay,
-      containsReservationDatetime
+      containsEffectiveReservationDatetime
     }
   },
   {

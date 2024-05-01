@@ -1,8 +1,9 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { getOrderList, pay, pickupBicycle, returnBicycle } from '@/api/order.js'
+import { getAfterSalesList, getOrderList, pay, pickupBicycle, returnBicycle } from '@/api/order.js'
 import { ref } from 'vue'
-import { closeToast, showLoadingToast, showSuccessToast } from 'vant'
+import { closeToast, showFailToast, showLoadingToast, showSuccessToast } from 'vant'
+import dayjs from 'dayjs'
 
 const route = useRoute()
 const router = useRouter()
@@ -11,8 +12,7 @@ const orderStateMapper = {
   all: '',
   pendingPayment: '0',
   waitingToBePickedUp: '1',
-  waitingToBeReturned: '2',
-  aftermarket: '4,6'
+  waitingToBeReturned: '2'
 }
 const orderStates = ref('')
 const orderList = ref([])
@@ -23,9 +23,18 @@ const getData = async () => {
     forbidClick: true,
     message: '加载中......'
   })
-  orderStates.value = orderStateMapper[orderType] || ''
-  const { data } = await getOrderList(orderStates.value)
-  orderList.value = data
+  if (orderType === 'aftermarket') {
+    const {
+      data: { list }
+    } = await getAfterSalesList()
+    orderList.value = list
+  } else {
+    orderStates.value = orderStateMapper[orderType] || ''
+    const {
+      data: { list }
+    } = await getOrderList(orderStates.value)
+    orderList.value = list
+  }
   closeToast()
 }
 getData()
@@ -39,6 +48,10 @@ const goPay = async (orderId, event) => {
 
 const pickup = async (order, event) => {
   event.stopPropagation()
+  if (dayjs().isBefore(dayjs(order.reservationStartTime).subtract(10, 'minute'))) {
+    showFailToast('最多仅可提前10分钟取车')
+    return
+  }
   const orderItem = {
     orderId: order.orderId,
     reservationStartTime: order.reservationStartTime,
@@ -87,21 +100,27 @@ const returnBike = async (order, event) => {
         <template #title>
           <div class="card-head">
             <div class="card-title">{{ order.goodsTitle }}</div>
-            <div class="order-state">{{ order.orderState }}</div>
+            <div class="order-state" v-if="orderType !== 'aftermarket'">{{ order.orderState }}</div>
+            <div class="order-state" v-else>{{ order.state }}</div>
           </div>
         </template>
         <template #price>
-          <div v-if="order.orderState !== '售后中'">{{ Number(order.totalPrice).toFixed(2) }}</div>
-          <div v-else>退款金额：￥{{ Number(order.refundAmount).toFixed(2) }}</div>
+          <div>￥{{ Number(order.totalPrice).toFixed(2) }}</div>
         </template>
         <template #desc>
           <van-text-ellipsis rows="2" :content="order.goodsDesc" />
         </template>
         <template v-slot:num>
-          <div v-if="order.orderState !== '售后中'">共{{ order.reservationDays }}天</div>
+          <div v-if="orderType !== 'aftermarket'">共{{ order.reservationDays }}天</div>
         </template>
         <template #footer>
-          <div>预约时间：{{ order.reservationStartTime + ' ~ ' + order.reservationEndTime }}</div>
+          <div v-if="orderType !== 'aftermarket'">
+            预约时间：{{ order.reservationStartTime + ' ~ ' + order.reservationEndTime }}
+          </div>
+          <div v-else-if="order.state === '售后中'">
+            申请退款金额：￥{{ order.requestRefundAmount }}
+          </div>
+          <div v-else>退款成功：￥{{ order.actualRefundAmount }}</div>
           <div v-if="order.orderState === '待支付'">
             <van-button
               size="small"
