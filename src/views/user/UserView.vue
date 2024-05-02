@@ -54,8 +54,10 @@ const getOrderStateCount = async () => {
       orderBadge.value.waitingToBePickedUp = item.count
     } else if (item.orderState === 2) {
       orderBadge.value.waitingToBeReturned = item.count
-    } else if (item.orderState === 4 || item.orderState === 6)
-      orderBadge.value.aftermarket += item.count
+    } else if (item.orderState === 6) {
+      // 只展示售后中的badge
+      orderBadge.value.aftermarket = item.count
+    }
   })
 }
 getOrderStateCount()

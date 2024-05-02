@@ -3,6 +3,7 @@ import { useRoute, useRouter } from 'vue-router'
 import {
   applyForAfterSales,
   cancelOrder,
+  getAfterSalesByOrderId,
   getOrderInfo,
   pay,
   pickupBicycle,
@@ -16,15 +17,21 @@ import _ from 'lodash'
 const route = useRoute()
 const router = useRouter()
 const orderId = route.params.orderId
+const state = route.query.state
 const orderInfo = ref({})
 const time = ref(1000 * 60 * 30)
 const showAfterSalesForm = ref(false)
 const formData = ref({})
 
 const setOrderInfo = async () => {
-  const { data } = await getOrderInfo(orderId)
-  orderInfo.value = data
-  time.value = dayjs(data.createTime).add(30, 'minute').diff(new Date(), 'millisecond')
+  let data = null
+  if (state === 'aftermarket') {
+    data = await getAfterSalesByOrderId(orderId)
+  } else {
+    data = await getOrderInfo(orderId)
+  }
+  orderInfo.value = data.data
+  time.value = dayjs(orderInfo.value.createTime).add(30, 'minute').diff(new Date(), 'millisecond')
 }
 setOrderInfo()
 
@@ -52,7 +59,7 @@ const returnBike = async () => {
   }
   await returnBicycle(orderItem)
   showSuccessToast('还车成功')
-  await router.push('/user')
+  await router.replace('/orderList/all')
 }
 
 const cancel = async () => {
@@ -89,7 +96,7 @@ const pickup = async () => {
   }
   await pickupBicycle(orderItem)
   showNotify({ type: 'success', message: '取车成功', background: '#57ad24' })
-  await router.push('/orderList/waitingToBeReturned')
+  await router.replace('/orderList/waitingToBeReturned')
 }
 
 const maxRefundAmount = (refundAmount) => {
@@ -102,7 +109,7 @@ const afterSalesSubmit = async () => {
   afterSalesInfo.refundReason = formData.value.refundReason
   await applyForAfterSales(afterSalesInfo)
   showNotify({ type: 'success', message: '申请售后成功', background: '#57ad24' })
-  await router.push('/orderList/aftermarket')
+  await router.replace('/orderList/aftermarket')
 }
 </script>
 
@@ -117,10 +124,29 @@ const afterSalesSubmit = async () => {
       :thumb="orderInfo.goodsImg"
       style="background-color: #fbfbfb"
     >
-      <template v-slot:num> 共{{ orderInfo.reservationDays }}天 </template>
+      <template #title>
+        <div class="card-head">
+          <div class="card-title">{{ orderInfo.goodsTitle }}</div>
+          <div class="order-state" v-if="!state">{{ orderInfo.orderState }}</div>
+          <div class="order-state" v-else>{{ orderInfo.state }}</div>
+        </div>
+      </template>
+      <template #desc>
+        <van-text-ellipsis rows="1" :content="orderInfo.goodsDesc" />
+      </template>
+      <template v-slot:num>
+        <div v-if="!state">共{{ orderInfo.reservationDays }}天</div>
+      </template>
     </van-card>
     <van-row>
       <van-cell-group style="width: 100%">
+        <van-cell
+          title="订单id"
+          title-style="flex: initial"
+          :value="orderInfo.orderId"
+          size="large"
+        >
+        </van-cell>
         <van-cell
           title="租赁时间"
           title-style="flex: initial"
@@ -143,6 +169,38 @@ const afterSalesSubmit = async () => {
           size="large"
         >
         </van-cell>
+        <div v-if="state">
+          <van-cell
+            title="申请退款金额"
+            title-style="flex: initial"
+            :value="`￥${orderInfo.requestRefundAmount}`"
+            size="large"
+          >
+          </van-cell>
+          <van-cell
+            title="申请退款理由"
+            title-style="flex: initial"
+            :value="orderInfo.refundReason"
+            size="large"
+          >
+          </van-cell>
+          <van-cell
+            title="实际退款金额"
+            v-if="orderInfo.actualRefundAmount"
+            title-style="flex: initial"
+            :value="`￥${orderInfo.actualRefundAmount}`"
+            size="large"
+          >
+          </van-cell>
+          <van-cell
+            title="卖家回复"
+            v-if="orderInfo.sellerReply"
+            title-style="flex: initial"
+            :value="orderInfo.sellerReply"
+            size="large"
+          >
+          </van-cell>
+        </div>
       </van-cell-group>
     </van-row>
     <van-row>
@@ -260,5 +318,19 @@ const afterSalesSubmit = async () => {
   bottom: 0;
   z-index: 100;
   margin: 16px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center; /* 垂直居中子元素 */
+  justify-content: space-between; /* 子元素之间等距分布，两端对齐 */
+  .card-title {
+    font-weight: bold; /* 字体加粗 */
+    font-size: 14px;
+  }
+  .order-state {
+    /* 如果需要，这里可以添加其他样式，比如字体大小、颜色等 */
+    color: red;
+  }
 }
 </style>

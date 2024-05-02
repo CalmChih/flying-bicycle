@@ -44,6 +44,7 @@ const goPay = async (orderId, event) => {
   const { data } = await pay(orderId)
   const newWindow = window.open('', '_blank') // 打开新窗口
   newWindow.document.write(data) // 将HTML写入新窗口文档
+  await router.replace('/orderList/all')
 }
 
 const pickup = async (order, event) => {
@@ -59,10 +60,15 @@ const pickup = async (order, event) => {
   }
   await pickupBicycle(orderItem)
   showSuccessToast('取车成功')
+  await router.replace('/orderList/waitingToBeReturned')
 }
 
 const goOrderDetail = (orderId) => {
-  router.push(`/orderDetail/${orderId}`)
+  let url = `/orderDetail/${orderId}`
+  if (orderType === 'aftermarket') {
+    url = url + '?state=aftermarket'
+  }
+  router.push(url)
 }
 
 const returnBike = async (order, event) => {
@@ -114,13 +120,11 @@ const returnBike = async (order, event) => {
           <div v-if="orderType !== 'aftermarket'">共{{ order.reservationDays }}天</div>
         </template>
         <template #footer>
-          <div v-if="orderType !== 'aftermarket'">
-            预约时间：{{ order.reservationStartTime + ' ~ ' + order.reservationEndTime }}
+          预约租赁时间：{{ order.reservationStartTime + ' ~ ' + order.reservationEndTime }}
+          <div v-if="order.state === '售后中'">申请退款金额：￥{{ order.requestRefundAmount }}</div>
+          <div v-else-if="order.state === '售后成功'">
+            退款成功：￥{{ order.actualRefundAmount }}
           </div>
-          <div v-else-if="order.state === '售后中'">
-            申请退款金额：￥{{ order.requestRefundAmount }}
-          </div>
-          <div v-else>退款成功：￥{{ order.actualRefundAmount }}</div>
           <div v-if="order.orderState === '待支付'">
             <van-button
               size="small"

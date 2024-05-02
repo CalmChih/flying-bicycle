@@ -55,3 +55,11 @@ export const returnBicycle = (orderItem) => {
 export const applyForAfterSales = (orderItem) => {
   return request.post('/afterSales/applyForAfterSales', { ...orderItem })
 }
+
+export const getAfterSalesByOrderId = (orderId) => {
+  return request.get('/afterSales/getAfterSalesByOrderId', {
+    params: {
+      orderId
+    }
+  })
+}
