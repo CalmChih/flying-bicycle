@@ -87,6 +87,27 @@ const cancel = async () => {
       // on cancel
     })
 }
+const cancelNoCheck = async () => {
+  showConfirmDialog({
+    title: '取消订单',
+    message: '确认取消订单吗',
+    width: '320px',
+    confirmButtonColor: 'blue'
+  })
+    .then(async () => {
+      const orderItem = {
+        orderId: orderInfo.value.orderId,
+        reservationStartTime: orderInfo.value.reservationStartTime,
+        orderState: orderInfo.value.orderState
+      }
+      await cancelOrder(orderItem)
+      router.back()
+      showNotify({ type: 'success', message: '取消订单成功', background: '#57ad24' })
+    })
+    .catch(() => {
+      // on cancel
+    })
+}
 
 const pickup = async () => {
   const orderItem = {
@@ -210,6 +231,7 @@ const afterSalesSubmit = async () => {
         button-text="去支付"
         @submit="onSubmit"
       >
+        <a @click="cancelNoCheck" style="color: #888888">取消订单</a>
         <template #tip>
           <van-count-down :time="time" format="mm:ss 后自动取消订单" @finish="onFinish"
         /></template>
