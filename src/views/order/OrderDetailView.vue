@@ -5,6 +5,7 @@ import {
   cancelOrder,
   getAfterSalesByOrderId,
   getOrderInfo,
+  getPayResult,
   pay,
   pickupBicycle,
   returnBicycle
@@ -50,6 +51,30 @@ const onSubmit = async () => {
   const { data } = await pay(orderId)
   const newWindow = window.open('', '_blank') // 打开新窗口
   newWindow.document.write(data) // 将HTML写入新窗口文档
+
+  showConfirmDialog({
+    title: '支付结果',
+    message: '请选择您的支付状态',
+    width: '320px',
+    confirmButtonColor: 'blue',
+    confirmButtonText: '已支付',
+    cancelButtonText: '未支付'
+  })
+    .then(async () => {
+      await getPayResult(orderId)
+        .then((resp) => {
+          if ('200' === resp.code) {
+            showSuccessToast('恭喜您支付成功')
+            router.replace('/user')
+          } else {
+            showFailToast('未检测到您的支付，请及时付款')
+          }
+        })
+        .catch(() => {})
+    })
+    .catch(() => {
+      // on cancel
+    })
 }
 
 const returnBike = async () => {

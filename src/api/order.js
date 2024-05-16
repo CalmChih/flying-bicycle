@@ -23,6 +23,14 @@ export const pay = (orderId) => {
   })
 }
 
+export const getPayResult = (orderId) => {
+  return request.get('/order/getPayResult', {
+    params: {
+      orderId
+    }
+  })
+}
+
 export const getOrderCountGroupByState = () => {
   return request.get('/order/getOrderCountGroupByState')
 }
