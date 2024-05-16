@@ -17,12 +17,16 @@ const searchParam = ref({
 })
 const tag = ref('')
 
-const getGoodsList = async () => {
+const getGoodsList = async (reservationDatetime) => {
   showLoadingToast({
     duration: 0,
     forbidClick: true,
     message: '加载中......'
   })
+  if (reservationDatetime) {
+    searchParam.value.reservationStartTime = reservationDatetime.reservationStartTime
+    searchParam.value.reservationEndTime = reservationDatetime.reservationEndTime
+  }
   const { data } = await getValidGoodsList(searchParam.value)
   products.value = data
   closeToast()

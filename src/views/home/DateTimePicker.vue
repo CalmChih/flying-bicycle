@@ -88,6 +88,8 @@ const setDefaultDatetimeRange = () => {
 if (selectedStore.containsEffectiveReservationDatetime) {
   leaseDate.value.reservationStartTime = selectedStore.reservationDatetime.reservationStartTime
   leaseDate.value.reservationEndTime = selectedStore.reservationDatetime.reservationEndTime
+  defaultDate[0] = dayjs(leaseDate.value.reservationStartTime).toDate()
+  defaultDate[1] = dayjs(leaseDate.value.reservationEndTime).toDate()
 } else {
   setDefaultDatetimeRange()
 }
@@ -96,8 +98,17 @@ const chooseTime = ref([])
 const maxDate = ref()
 const minDate = ref()
 const chooseRange = () => {
-  const defaultTime = columns.value[0][0].value
-  chooseTime.value.push(defaultTime, defaultTime)
+  if (selectedStore.containsEffectiveReservationDatetime) {
+    chooseTime.value.push(
+      dayjs(selectedStore.reservationDatetime.reservationStartTime).format('HH:mm')
+    )
+    chooseTime.value.push(
+      dayjs(selectedStore.reservationDatetime.reservationEndTime).format('HH:mm')
+    )
+  } else {
+    const defaultTime = columns.value[0][0].value
+    chooseTime.value.push(defaultTime, defaultTime)
+  }
   showTimePicker.value = true
   if (currTimeStr.value < timeList[timeList.length - 1]) {
     minDate.value = dayjs().toDate()
@@ -117,7 +128,7 @@ const confirm = () => {
   const endDate = selectedDate[1]
   leaseDate.value.reservationStartTime = dayjs(startDate).format(format) + ' ' + chooseTime.value[0]
   leaseDate.value.reservationEndTime = dayjs(endDate).format(format) + ' ' + chooseTime.value[1]
-  emit('updateGoodsList')
+  emit('updateGoodsList', leaseDate.value)
   showTimePicker.value = false
 }
 const cancel = () => {
