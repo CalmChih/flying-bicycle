@@ -87,7 +87,6 @@ const setDefaultDatetimeRange = () => {
 }
 onMounted(() => {
   if (selectedStore.containsEffectiveReservationDatetime) {
-    console.log('jin')
     leaseDate.value.reservationStartTime = selectedStore.reservationDatetime.reservationStartTime
     leaseDate.value.reservationEndTime = selectedStore.reservationDatetime.reservationEndTime
     defaultDate[0] = dayjs(leaseDate.value.reservationStartTime).toDate()

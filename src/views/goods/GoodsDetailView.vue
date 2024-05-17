@@ -49,7 +49,7 @@ const onSubmit = async () => {
       </van-col>
     </van-row>
     <van-row>
-      <van-cell-group>
+      <van-cell-group style="width: 100%">
         <van-cell
           :title="goodsItem.goodsTitle"
           :label="goodsItem.goodsDesc"
