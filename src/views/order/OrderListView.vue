@@ -1,8 +1,21 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { getAfterSalesList, getOrderList, pay, pickupBicycle, returnBicycle } from '@/api/order.js'
+import {
+  getAfterSalesList,
+  getOrderList,
+  getPayResult,
+  pay,
+  pickupBicycle,
+  returnBicycle
+} from '@/api/order.js'
 import { ref } from 'vue'
-import { closeToast, showFailToast, showLoadingToast, showSuccessToast } from 'vant'
+import {
+  closeToast,
+  showConfirmDialog,
+  showFailToast,
+  showLoadingToast,
+  showSuccessToast
+} from 'vant'
 import dayjs from 'dayjs'
 
 const route = useRoute()
@@ -44,7 +57,30 @@ const goPay = async (orderId, event) => {
   const { data } = await pay(orderId)
   const newWindow = window.open('', '_blank') // 打开新窗口
   newWindow.document.write(data) // 将HTML写入新窗口文档
-  await router.replace('/orderList/all')
+
+  showConfirmDialog({
+    title: '支付结果',
+    message: '请选择您的支付状态',
+    width: '320px',
+    confirmButtonColor: 'blue',
+    confirmButtonText: '已支付',
+    cancelButtonText: '未支付'
+  })
+    .then(async () => {
+      await getPayResult(orderId)
+        .then((resp) => {
+          if ('200' === resp.code) {
+            showSuccessToast('恭喜您支付成功')
+            router.replace('/user')
+          } else {
+            showFailToast('未检测到您的支付，请及时付款')
+          }
+        })
+        .catch(() => {})
+    })
+    .catch(() => {
+      // on cancel
+    })
 }
 
 const pickup = async (order, event) => {
@@ -60,7 +96,7 @@ const pickup = async (order, event) => {
   }
   await pickupBicycle(orderItem)
   showSuccessToast('取车成功')
-  await router.replace('/orderList/waitingToBeReturned')
+  await router.replace('/orderList/waitingToBeReturned').then(() => router.go(0))
 }
 
 const goOrderDetail = (orderId) => {
@@ -79,7 +115,7 @@ const returnBike = async (order, event) => {
   }
   await returnBicycle(orderItem)
   showSuccessToast('还车成功')
-  router.go(0)
+  await router.replace('/user')
 }
 </script>
 

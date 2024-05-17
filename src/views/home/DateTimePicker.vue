@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch, defineEmits } from 'vue'
+import { computed, ref, watch, defineEmits, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { useSelectedStore } from '@/stores/index.js'
 
@@ -85,14 +85,17 @@ const setDefaultDatetimeRange = () => {
       dayjs().add(2, 'day').format(format) + ' ' + columns.value[0][0].value
   }
 }
-if (selectedStore.containsEffectiveReservationDatetime) {
-  leaseDate.value.reservationStartTime = selectedStore.reservationDatetime.reservationStartTime
-  leaseDate.value.reservationEndTime = selectedStore.reservationDatetime.reservationEndTime
-  defaultDate[0] = dayjs(leaseDate.value.reservationStartTime).toDate()
-  defaultDate[1] = dayjs(leaseDate.value.reservationEndTime).toDate()
-} else {
-  setDefaultDatetimeRange()
-}
+onMounted(() => {
+  if (selectedStore.containsEffectiveReservationDatetime) {
+    console.log('jin')
+    leaseDate.value.reservationStartTime = selectedStore.reservationDatetime.reservationStartTime
+    leaseDate.value.reservationEndTime = selectedStore.reservationDatetime.reservationEndTime
+    defaultDate[0] = dayjs(leaseDate.value.reservationStartTime).toDate()
+    defaultDate[1] = dayjs(leaseDate.value.reservationEndTime).toDate()
+  } else {
+    setDefaultDatetimeRange()
+  }
+})
 
 const chooseTime = ref([])
 const maxDate = ref()

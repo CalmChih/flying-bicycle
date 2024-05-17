@@ -22,7 +22,13 @@ export const useSelectedStore = defineStore(
         reservationDatetime.value.reservationStartTime !== '' &&
         reservationDatetime.value.reservationEndTime !== ''
       ) {
-        return dayjs().isBefore(reservationDatetime.value.reservationStartTime)
+        let flag = false
+        if (localStorage.getItem('selectedDateTime')) {
+          flag = dayjs().isBefore(
+            JSON.parse(localStorage.getItem('selectedDateTime')).reservationStartTime
+          )
+        }
+        return flag && dayjs().isBefore(reservationDatetime.value.reservationStartTime)
       }
       return false
     })
